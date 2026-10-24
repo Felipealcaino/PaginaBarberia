@@ -335,6 +335,25 @@
       .mapa-caja, .mapa-caja iframe { min-height: 320px; }
       .v-ant, .v-sig { top: auto; bottom: 22px; }
     }
+        /* ---------- ARREGLO: que en celular la página no se corra hacia los lados ---------- */
+    html { overflow-x: hidden; }
+    body { overflow-x: visible; }
+    section, .cinta, footer { overflow-x: clip; }
+    h1, h2, h3, h4, .fila-nombre { overflow-wrap: break-word; }
+    @media (max-width: 760px) {
+      .curso h3 { font-size: clamp(2.2rem, 11vw, 3rem); }
+      .curso-precio { font-size: 1.8rem; }
+      .fila { grid-template-columns: 1fr; gap: 4px; }
+      .fila-nombre { font-size: 1.45rem; }
+      .fila-detalle { grid-column: 1; grid-row: auto; }
+      .fila-precio { grid-column: 1; grid-row: auto; text-align: left; white-space: normal; font-size: 1.15rem; margin-top: 4px; }
+      .fila-precio small { display: none; }
+      .obra-final h3 { font-size: 1.6rem; }
+      .titulo { font-size: clamp(2.3rem, 11vw, 2.8rem); }
+      .bloque-cabeza h3 { font-size: 1.5rem; }
+      .enlace-grande { font-size: 1.7rem; }
+      .chip { white-space: normal; text-align: left; }
+    }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation: none !important; transition: none !important; }
       html.js .sube, html.js .destapa > img, html.js .hero-titulo .letra, html.js .pie-gigante .letra { opacity: 1 !important; transform: none !important; clip-path: none !important; }
