@@ -1267,5 +1267,157 @@
       } catch (err) { b.disabled = false; $("#pdMsgAdmin").textContent = "No se pudo desbloquear."; }
     });
   </script>
+    <!-- ==================== IDIOMAS: ESPAÑOL / INGLÉS / IRLANDÉS ==================== -->
+  <style>
+    .idiomas { display: inline-flex; gap: 2px; padding: 3px; border: 1px solid var(--linea); border-radius: 100px; }
+    .idiomas button { padding: 6px 9px; border-radius: 100px; font-size: .74rem; font-weight: 700; letter-spacing: .06em; color: var(--gris); transition: background .3s, color .3s; }
+    .idiomas button:hover { color: var(--tinta); }
+    .idiomas button.activo { background: var(--tinta); color: var(--papel); }
+    .barra { gap: 12px; }
+    .barra-der { display: flex; align-items: center; gap: 10px; }
+    /* En inglés e irlandés algunas palabras son más largas: los títulos de los cursos se achican un poco */
+    html:not([lang="es"]) .curso h3 { font-size: clamp(2rem, 3.4vw, 3.4rem); }
+    @media (max-width: 760px) {
+      html:not([lang="es"]) .curso h3 { font-size: min(2.2rem, 6.4vw); }
+      .idiomas button { padding: 6px 7px; font-size: .68rem; }
+    }
+    @media (max-width: 400px) {
+      .barra { padding-left: 16px; gap: 8px; }
+      .marca em { display: none; }
+      .barra-der { gap: 6px; }
+      .barra-menu { padding: 10px 13px; font-size: .82rem; }
+    }
+  </style>
+
+  <script>
+  (function () {
+    /* =====================================================================
+       TRADUCCIONES. Si cambias un texto en español en la página, cambia
+       también aquí la frase en español (a la izquierda) para que se siga
+       traduciendo. Si no la encuentra, ese texto se queda en español.
+       ===================================================================== */
+    const T = {
+      en: {
+        "Trabajos": "Work", "Precios": "Prices", "Cursos": "Courses", "Contacto": "Contact", "Agendar hora": "Book now", "Menú": "Menu", "Cerrar": "Close", "Inicio": "Home", "Agenda": "Booking",
+        "Barbero & colorista · Curicó, Chile · @joakobarber._00": "Barber & colourist · Curicó, Chile · @joakobarber._00",
+        "Barbero & colorista": "Barber & colourist", "Curicó — Chile": "Curicó — Chile", "Agenda abierta": "Booking open",
+        "Fades limpios, diseños a navaja y": "Clean fades, razor designs and", "color": "colour", "con técnica. Cada corte, pensado para ti.": "done with technique. Every cut, made for you.",
+        "Agenda tu hora": "Book your appointment", "Visos + fade": "Highlights + fade", "Global": "Full colour",
+        "Agenda tu hora ✶ Agenda tu hora ✶": "Book your cut ✶ Book your cut ✶",
+        "Fades": "Fades", "diseños": "designs", "Visos": "Highlights", "globales": "full colour", "Barba": "Beard",
+        "Sobre mí": "About me", "Fades y diseños": "Fades & designs", "Low, mid y high fade, con líneas y diseños a navaja.": "Low, mid and high fades, with razor lines and designs.",
+        "Colorista": "Colourist", "Visos, globales y color personalizado con teoría del color.": "Highlights, full colour and custom colour, based on colour theory.",
+        "Cejas incluidas": "Eyebrows included", "Todo corte de pelo incluye el perfilado de cejas gratis.": "Every haircut includes a free eyebrow shape-up.",
+        "Hecho en": "Made in", "la silla": "the chair",
+        "Diseño a navaja": "Razor design", "Global platinado": "Platinum full colour", "Fade texturizado": "Textured fade", "Visos rubios": "Blonde highlights", "Diseño lateral": "Side design", "Diseño + fade": "Design + fade", "Más en Instagram": "More on Instagram",
+        "La": "The", "carta": "price list", "Precios claros, sin sorpresas al pagar. Toca un servicio para agendarlo directo.": "Clear prices, no surprises at the till. Tap a service to book it straight away.",
+        "Barbería": "Barbering", "Corte de pelo": "Haircut", "Incluye cejas gratis": "Free eyebrows included", "Agendar →": "Book →",
+        "Perfilado, rebaja o quitar totalmente": "Shape-up, trim or full shave", "Diseño": "Design", "Líneas y diseños a navaja": "Razor lines and designs", "Consultar": "Ask",
+        "Color": "Colour", "Independiente de la cantidad que quieras": "However many you want", "Color en todo el pelo: platinado, rubio y más": "All-over colour: platinum, blonde and more",
+        "Personalizado": "Custom", "Bloque de color, mitad de global, etc.": "Colour blocks, half head, etc.",
+        "Reserva en": "Book in", "un minuto": "one minute", "¿Qué te hacemos?": "What can I do for you?", "¿Qué día te acomoda?": "Which day suits you?", "¿A qué hora?": "What time?", "¿A nombre de quién?": "Under what name?",
+        "Hoy": "Today", "Dom": "Sun", "Lun": "Mon", "Mar": "Tue", "Mié": "Wed", "Jue": "Thu", "Vie": "Fri", "Sáb": "Sat",
+        "ene": "Jan", "feb": "Feb", "mar": "Mar", "abr": "Apr", "may": "May", "jun": "Jun", "jul": "Jul", "ago": "Aug", "sep": "Sep", "oct": "Oct", "nov": "Nov", "dic": "Dec",
+        "La letra chica": "The small print",
+        "Si no puedes venir, avisa con al menos 3 horas de anticipación.": "If you can't make it, let me know at least 3 hours in advance.",
+        "Con más de 10 minutos de atraso, se puede perder la hora.": "If you're more than 10 minutes late, you may lose your slot.",
+        "Si faltas 2 veces sin avisar, para volver a agendar se pide un abono.": "Miss 2 appointments without notice and a deposit is needed to book again.",
+        "La hora queda lista cuando Joaquín te la confirma por WhatsApp.": "Your booking is set once Joaquín confirms it on WhatsApp.",
+        "Pre-reserva ·": "Pre-booking ·", "Servicio": "Service", "Día": "Day", "Hora": "Time", "Cliente": "Client", "Total": "Total",
+        "Enviar por WhatsApp →": "Send via WhatsApp →", "Empezar de nuevo": "Start again", "Completa los 4 pasos para enviar.": "Complete the 4 steps to send.",
+        "¡Listo! Joaquín te confirma por WhatsApp.": "Done! Joaquín will confirm on WhatsApp.", "No quedan horas este día. Elige otro.": "No times left on this day. Pick another one.",
+        "No es posible agendar online con este número. Escríbele directamente a Joaquín.": "Online booking isn't available for this number. Please message Joaquín directly.",
+        "Aprende": "Learn", "el oficio": "the trade", "Tres niveles, desde cero hasta técnicas avanzadas. Próximos cursos:": "Three levels, from zero to advanced techniques. Next courses:",
+        "diciembre 2026": "December 2026", ". Cupos limitados.": ". Limited places.",
+        "Nivel 01": "Level 01", "Nivel 02": "Level 02", "Nivel 03": "Level 03", "Básico": "Basic", "Intermedio": "Intermediate", "Avanzado": "Advanced",
+        "4 clases · 3 horas cada una": "4 classes · 3 hours each", "6 clases · 3 horas cada una": "6 classes · 3 hours each", "6 clases · 4 horas cada una": "6 classes · 4 hours each",
+        "Para principiantes, sin experiencia": "For beginners, no experience needed", "Uso y cuidado de máquinas y tijeras": "Using and caring for clippers and scissors",
+        "Cortes clásicos básicos": "Basic classic cuts", "Higiene y atención al cliente": "Hygiene and customer service", "Práctica con modelos": "Practice on live models", "Quiero inscribirme": "Sign me up",
+        "Requiere curso básico o experiencia": "Requires the basic course or experience", "Degradados: low, mid y high fade": "Fades: low, mid and high", "Arreglo de barba": "Beard grooming", "Perfilado y terminaciones": "Line-ups and finishing",
+        "Para barberos con experiencia": "For experienced barbers", "Diseños y cortes de tendencia": "Designs and trending cuts", "Técnicas de tijera avanzadas": "Advanced scissor techniques",
+        "Cómo cobrar y conseguir clientes": "Pricing and finding clients", "Certificado de aprobación": "Certificate of completion",
+        "Preguntas": "Frequently", "frecuentes": "asked questions",
+        "¿Necesito experiencia para entrar?": "Do I need experience to join?",
+        "Para el nivel básico no. Para intermedio y avanzado necesitas haber hecho el nivel anterior o demostrar experiencia.": "Not for the basic level. For intermediate and advanced, you need to have done the previous level or show experience.",
+        "¿Cómo reservo mi cupo?": "How do I book my place?",
+        "Escríbeme por WhatsApp. El cupo queda reservado al pagar un abono del 50% por transferencia, y el resto se paga el primer día de clases.": "Message me on WhatsApp. Your place is held once you pay a 50% deposit by bank transfer; the rest is paid on the first day.",
+        "¿Tengo que llevar mis herramientas?": "Do I need to bring my own tools?",
+        "Para el nivel básico te presto las herramientas. Para intermedio y avanzado se recomienda traer tu propio kit.": "For the basic level I'll lend you the tools. For intermediate and advanced, bringing your own kit is recommended.",
+        "¿Entregan certificado?": "Do you give a certificate?", "Sí, al terminar cada nivel recibes un certificado de participación.": "Yes, you get a certificate of participation when you finish each level.",
+        "¿Qué pasa si falto a una clase?": "What if I miss a class?", "Avísame con anticipación y vemos cómo recuperarla en otro horario.": "Let me know in advance and we'll find another time to make it up.",
+        "Pasa por": "Come sit in", "Dónde": "Where", "Curicó, Región del Maule": "Curicó, Maule Region", "Horario": "Opening hours",
+        "Lunes": "Monday", "Martes": "Tuesday", "Miércoles": "Wednesday", "Jueves": "Thursday", "Viernes": "Friday", "Sábado": "Saturday", "Domingo": "Sunday", "Cerrado": "Closed",
+        "Volver arriba ↑": "Back to top ↑",
+        "Tu nombre": "Your name", "Tu teléfono": "Your phone", "Comentario (opcional): ej. mid fade con diseño": "Comment (optional): e.g. mid fade with a design",
+        "_titulo": "Joako Barber | Barber & colourist in Curicó",
+        "_sobre": "I'm Joaquín, a barber and *colourist* in Curicó. I work every fade down to the detail, draw razor designs and I'm not afraid of colour: highlights, full colour and platinum you can spot from a mile away.",
+        "_falta": "Missing: ", "_faltan": { "servicio": "service", "día": "day", "hora": "time", "nombre": "name", "teléfono": "phone" },
+        "_dias": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+        "_meses": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+        "_fecha": (dia, n, mes) => `${dia} ${n} ${mes}`
+      },
+      ga: {
+        "Trabajos": "Saothar", "Precios": "Praghsanna", "Cursos": "Cúrsaí", "Contacto": "Teagmháil", "Agendar hora": "Cuir in áirithe", "Menú": "Roghchlár", "Cerrar": "Dún", "Inicio": "Baile", "Agenda": "Áirithint",
+        "Barbero & colorista · Curicó, Chile · @joakobarber._00": "Bearbóir & dathadóir · Curicó, an tSile · @joakobarber._00",
+        "Barbero & colorista": "Bearbóir & dathadóir", "Curicó — Chile": "Curicó — an tSile", "Agenda abierta": "Áirithintí ar oscailt",
+        "Fades limpios, diseños a navaja y": "Fades glana, dearaí rásúir agus", "color": "dath", "con técnica. Cada corte, pensado para ti.": "le teicníc. Gach gearradh, déanta duitse.",
+        "Agenda tu hora": "Cuir coinne in áirithe", "Visos + fade": "Buaicphointí + fade", "Global": "Dath iomlán",
+        "Agenda tu hora ✶ Agenda tu hora ✶": "Cuir in áirithe ✶ Cuir in áirithe ✶",
+        "Fades": "Fades", "diseños": "dearaí", "Visos": "Buaicphointí", "globales": "dath iomlán", "Barba": "Féasóg",
+        "Sobre mí": "Fúmsa", "Fades y diseños": "Fades & dearaí", "Low, mid y high fade, con líneas y diseños a navaja.": "Fades íseal, meán agus ard, le línte agus dearaí rásúir.",
+        "Colorista": "Dathadóir", "Visos, globales y color personalizado con teoría del color.": "Buaicphointí, dath iomlán agus dath saincheaptha, bunaithe ar theoiric an datha.",
+        "Cejas incluidas": "Malaí san áireamh", "Todo corte de pelo incluye el perfilado de cejas gratis.": "Tá múnlú malaí saor in aisce le gach gearradh gruaige.",
+        "Hecho en": "Déanta sa", "la silla": "chathaoir",
+        "Diseño a navaja": "Dearadh rásúir", "Global platinado": "Platanam iomlán", "Fade texturizado": "Fade uigeachta", "Visos rubios": "Buaicphointí fionna", "Diseño lateral": "Dearadh taoibh", "Diseño + fade": "Dearadh + fade", "Más en Instagram": "Tuilleadh ar Instagram",
+        "La": "An", "carta": "praghasliosta", "Precios claros, sin sorpresas al pagar. Toca un servicio para agendarlo directo.": "Praghsanna soiléire, gan aon iontas ag an deireadh. Tapáil seirbhís chun í a chur in áirithe láithreach.",
+        "Barbería": "Bearbóireacht", "Corte de pelo": "Gearradh gruaige", "Incluye cejas gratis": "Malaí saor in aisce san áireamh", "Agendar →": "Áirithe →",
+        "Perfilado, rebaja o quitar totalmente": "Múnlú, bearradh nó bearradh iomlán", "Diseño": "Dearadh", "Líneas y diseños a navaja": "Línte agus dearaí rásúir", "Consultar": "Fiafraigh",
+        "Color": "Dath", "Independiente de la cantidad que quieras": "Is cuma cé mhéad atá uait", "Color en todo el pelo: platinado, rubio y más": "Dath ar an ngruaig ar fad: platanam, fionn agus tuilleadh",
+        "Personalizado": "Saincheaptha", "Bloque de color, mitad de global, etc.": "Bloic datha, leath an chloigeann, srl.",
+        "Reserva en": "Cuir in áirithe i", "un minuto": "nóiméad", "¿Qué te hacemos?": "Cad a dhéanfaidh mé duit?", "¿Qué día te acomoda?": "Cén lá a oireann duit?", "¿A qué hora?": "Cén t-am?", "¿A nombre de quién?": "Cén t-ainm?",
+        "Hoy": "Inniu", "Dom": "Domh", "Lun": "Luan", "Mar": "Máirt", "Mié": "Céad", "Jue": "Déar", "Vie": "Aoine", "Sáb": "Sath",
+        "ene": "Ean", "feb": "Feabh", "mar": "Márta", "abr": "Aib", "may": "Beal", "jun": "Meith", "jul": "Iúil", "ago": "Lún", "sep": "MFómh", "oct": "DFómh", "nov": "Samh", "dic": "Noll",
+        "La letra chica": "An cló beag",
+        "Si no puedes venir, avisa con al menos 3 horas de anticipación.": "Mura féidir leat teacht, cuir in iúl dom 3 uair an chloig roimh ré ar a laghad.",
+        "Con más de 10 minutos de atraso, se puede perder la hora.": "Má bhíonn tú níos mó ná 10 nóiméad déanach, d'fhéadfá do choinne a chailleadh.",
+        "Si faltas 2 veces sin avisar, para volver a agendar se pide un abono.": "Má chailleann tú 2 choinne gan rabhadh, beidh éarlais ag teastáil chun áirithint arís.",
+        "La hora queda lista cuando Joaquín te la confirma por WhatsApp.": "Bíonn do choinne socraithe nuair a dheimhníonn Joaquín í ar WhatsApp.",
+        "Pre-reserva ·": "Réamháirithint ·", "Servicio": "Seirbhís", "Día": "Lá", "Hora": "Am", "Cliente": "Custaiméir", "Total": "Iomlán",
+        "Enviar por WhatsApp →": "Seol ar WhatsApp →", "Empezar de nuevo": "Tosaigh arís", "Completa los 4 pasos para enviar.": "Críochnaigh na 4 chéim chun é a sheoladh.",
+        "¡Listo! Joaquín te confirma por WhatsApp.": "Réidh! Deimhneoidh Joaquín é ar WhatsApp.", "No quedan horas este día. Elige otro.": "Níl am ar bith fágtha an lá seo. Roghnaigh lá eile.",
+        "No es posible agendar online con este número. Escríbele directamente a Joaquín.": "Níl áirithint ar líne ar fáil don uimhir seo. Déan teagmháil le Joaquín go díreach.",
+        "Aprende": "Foghlaim", "el oficio": "an cheird", "Tres niveles, desde cero hasta técnicas avanzadas. Próximos cursos:": "Trí leibhéal, ón tús go teicníochtaí ardleibhéil. Na chéad chúrsaí eile:",
+        "diciembre 2026": "Nollaig 2026", ". Cupos limitados.": ". Líon teoranta áiteanna.",
+        "Nivel 01": "Leibhéal 01", "Nivel 02": "Leibhéal 02", "Nivel 03": "Leibhéal 03", "Básico": "Bunúsach", "Intermedio": "Idirmheánach", "Avanzado": "Ardleibhéal",
+        "4 clases · 3 horas cada una": "4 rang · 3 uair an chloig an ceann", "6 clases · 3 horas cada una": "6 rang · 3 uair an chloig an ceann", "6 clases · 4 horas cada una": "6 rang · 4 uair an chloig an ceann",
+        "Para principiantes, sin experiencia": "Do thosaitheoirí, níl taithí ag teastáil", "Uso y cuidado de máquinas y tijeras": "Clipeanna agus siosúir a úsáid agus a chothabháil",
+        "Cortes clásicos básicos": "Gearrthacha clasaiceacha bunúsacha", "Higiene y atención al cliente": "Sláinteachas agus seirbhís do chustaiméirí", "Práctica con modelos": "Cleachtadh ar mhúnlaí beo", "Quiero inscribirme": "Cláraigh mé",
+        "Requiere curso básico o experiencia": "Teastaíonn an bunchúrsa nó taithí", "Degradados: low, mid y high fade": "Fades: íseal, meán agus ard", "Arreglo de barba": "Cóiriú féasóige", "Perfilado y terminaciones": "Línte agus críochnú",
+        "Para barberos con experiencia": "Do bhearbóirí a bhfuil taithí acu", "Diseños y cortes de tendencia": "Dearaí agus gearrthacha faiseanta", "Técnicas de tijera avanzadas": "Teicníochtaí siosúir ardleibhéil",
+        "Cómo cobrar y conseguir clientes": "Praghsáil agus custaiméirí a fháil", "Certificado de aprobación": "Teastas críochnaithe",
+        "Preguntas": "Ceisteanna", "frecuentes": "coitianta",
+        "¿Necesito experiencia para entrar?": "An gá dom taithí a bheith agam?",
+        "Para el nivel básico no. Para intermedio y avanzado necesitas haber hecho el nivel anterior o demostrar experiencia.": "Ní gá don bhunleibhéal. Don mheánleibhéal agus don ardleibhéal, caithfidh tú an leibhéal roimhe a bheith déanta agat nó taithí a léiriú.",
+        "¿Cómo reservo mi cupo?": "Conas a chuirim m'áit in áirithe?",
+        "Escríbeme por WhatsApp. El cupo queda reservado al pagar un abono del 50% por transferencia, y el resto se paga el primer día de clases.": "Seol teachtaireacht chugam ar WhatsApp. Coinnítear d'áit nuair a íocann tú éarlais 50% trí aistriú bainc, agus íoctar an chuid eile ar an gcéad lá.",
+        "¿Tengo que llevar mis herramientas?": "An gá dom mo chuid uirlisí féin a thabhairt liom?",
+        "Para el nivel básico te presto las herramientas. Para intermedio y avanzado se recomienda traer tu propio kit.": "Don bhunleibhéal tabharfaidh mé na huirlisí ar iasacht duit. Don mheánleibhéal agus don ardleibhéal, moltar do threalamh féin a thabhairt leat.",
+        "¿Entregan certificado?": "An dtugann tú teastas?", "Sí, al terminar cada nivel recibes un certificado de participación.": "Tugaim. Faigheann tú teastas rannpháirtíochta ag deireadh gach leibhéil.",
+        "¿Qué pasa si falto a una clase?": "Cad a tharlaíonn má chailleann mé rang?", "Avísame con anticipación y vemos cómo recuperarla en otro horario.": "Cuir in iúl dom roimh ré agus aimseoimid am eile chun é a dhéanamh suas.",
+        "Pasa por": "Suigh sa", "Dónde": "Cá háit", "Curicó, Región del Maule": "Curicó, Réigiún Maule", "Horario": "Uaireanta oscailte",
+        "Lunes": "Dé Luain", "Martes": "Dé Máirt", "Miércoles": "Dé Céadaoin", "Jueves": "Déardaoin", "Viernes": "Dé hAoine", "Sábado": "Dé Sathairn", "Domingo": "Dé Domhnaigh", "Cerrado": "Dúnta",
+        "Volver arriba ↑": "Ar ais go barr ↑",
+        "Tu nombre": "D'ainm", "Tu teléfono": "D'uimhir fóin", "Comentario (opcional): ej. mid fade con diseño": "Nóta (roghnach): m.sh. mid fade le dearadh",
+        "_titulo": "Joako Barber | Bearbóir agus dathadóir i gCuricó",
+        "_sobre": "Is mise Joaquín, bearbóir agus *dathadóir* i gCuricó. Oibrím gach fade go mion, tarraingím dearaí le rásúr agus níl eagla orm roimh dhath: buaicphointí, dath iomlán agus platanam a fheicfeá i bhfad uait.",
+        "_falta": "Ar iarraidh: ", "_faltan": { "servicio": "seirbhís", "día": "lá", "hora": "am", "nombre": "ainm", "teléfono": "fón" },
+        "_dias": ["Dé Domhnaigh", "Dé Luain", "Dé Máirt", "Dé Céadaoin", "Déardaoin", "Dé hAoine", "Dé Sathairn"],
+        "_meses": ["Eanáir", "Feabhra", "Márta", "Aibreán", "Bealtaine", "Meitheamh", "Iúil", "Lúnasa", "Meán Fómhair", "Deireadh Fómhair", "Samhain", "Nollaig"],
+        "_fecha": (dia, n, mes) => `${dia} ${n} ${mes}`
+      }
+    };
+    /* ===================== FIN DE LAS TRADUCCIONES ===================== */
+
+    const DIAS_ES = ["Domingo", "Lunes", "Martes", "Miércoles",
 </body>
 </html>
