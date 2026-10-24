@@ -355,8 +355,8 @@
       .chip { white-space: normal; text-align: left; }
     }
         /* ---------- ARREGLO: títulos de los cursos que no se corten ---------- */
-    .curso h3 { font-size: clamp(2.4rem, 4.6vw, 4.6rem); overflow-wrap: anywhere; }
-    @media (max-width: 760px) {
+      .curso h3 { font-size: clamp(2.2rem, 4vw, 3.8rem); overflow-wrap: anywhere; }    
+      @media (max-width: 760px) {
       .curso { padding: 28px 22px; }
       .curso h3 { font-size: min(2.4rem, 8.4vw); margin: 10px 0 14px; }
       .curso-precio { font-size: 1.6rem; }
@@ -584,17 +584,20 @@
     <div class="envoltura">
       <div class="capitulo sube"><b>06</b>Contacto</div>
       <h2 class="titulo sube">Pasa por <em>la silla</em></h2>
-      <div class="contacto-grid">
+            <div class="contacto-grid">
         <div>
           <a class="enlace-grande sube" id="linkWsp" target="_blank">WhatsApp <span>↗</span></a>
           <a class="enlace-grande sube" href="https://www.instagram.com/joakobarber._00/" target="_blank">Instagram <span>↗</span></a>
           <a class="enlace-grande sube" href="#agenda" data-nombre="Agenda">Agendar hora <span>↗</span></a>
           <div class="info-contacto sube">
             <!-- CAMBIA: dirección exacta -->
-            <div><small>Dónde</small><p>Colbún 1379, Curicó</p><a class="como-llegar" href="https://www.google.com/maps/dir/?api=1&destination=Colb%C3%BAn+1379%2C+Curic%C3%B3%2C+Chile" target="_blank">Cómo llegar ↗</a></div>          </div>
+            <div><small>Dónde</small><p>Colbún 1379, Curicó</p><a class="como-llegar" href="https://www.google.com/maps/dir/?api=1&destination=Colb%C3%BAn+1379%2C+Curic%C3%B3%2C+Chile" target="_blank">Cómo llegar ↗</a></div>
+            <div><small>Horario</small><ul class="horario" id="listaHorario"></ul></div>
+          </div>
         </div>
         <!-- CAMBIA: pon la dirección exacta después de q= (los espacios van con +) -->
-        <div class="mapa-caja sube"><iframe loading="lazy" src="https://www.google.com/maps?q=Colb%C3%BAn+1379,+Curic%C3%B3,+Chile&z=17&output=embed" title="Mapa"></iframe></div>      </div>
+        <div class="mapa-caja sube"><iframe loading="lazy" src="https://www.google.com/maps?q=Colb%C3%BAn+1379,+Curic%C3%B3,+Chile&z=17&output=embed" title="Mapa"></iframe></div>
+      </div>
     </div>
     <div class="pie-gigante envoltura" id="pieGigante">
       <h2 class="dividir" aria-label="Joako">JOAKO</h2>
@@ -1275,7 +1278,7 @@
     .barra { gap: 12px; }
     .barra-der { display: flex; align-items: center; gap: 10px; }
     /* En inglés e irlandés algunas palabras son más largas: los títulos de los cursos se achican un poco */
-    html:not([lang="es"]) .curso h3 { font-size: clamp(2rem, 3.4vw, 3.4rem); }
+    html:not([lang="es"]) .curso h3 { font-size: clamp(1.9rem, 3.2vw, 3rem); }
     @media (max-width: 760px) {
       html:not([lang="es"]) .curso h3 { font-size: min(2.2rem, 6.4vw); }
       .idiomas button { padding: 6px 7px; font-size: .68rem; }
