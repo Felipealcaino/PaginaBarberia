@@ -1266,8 +1266,8 @@
         await cargarLista();
       } catch (err) { b.disabled = false; $("#pdMsgAdmin").textContent = "No se pudo desbloquear."; }
     });
-  </script>
-    <!-- ==================== IDIOMAS: ESPAÑOL / INGLÉS / IRLANDÉS ==================== -->
+
+      <!-- ==================== IDIOMAS: ESPAÑOL / INGLÉS / IRLANDÉS ==================== -->
   <style>
     .idiomas { display: inline-flex; gap: 2px; padding: 3px; border: 1px solid var(--linea); border-radius: 100px; }
     .idiomas button { padding: 6px 9px; border-radius: 100px; font-size: .74rem; font-weight: 700; letter-spacing: .06em; color: var(--gris); transition: background .3s, color .3s; }
@@ -1418,6 +1418,110 @@
     };
     /* ===================== FIN DE LAS TRADUCCIONES ===================== */
 
-    const DIAS_ES = ["Domingo", "Lunes", "Martes", "Miércoles",
+    const DIAS_ES = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+    const MESES_ES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+    const SALTAR = "script, style, #panelDueno, .declaracion, .hero-titulo, .pie-gigante h2, .idiomas";
+    const guardados = new Map();           // nodo de texto -> { es, tr }
+    let idioma = "es";
+    const tituloEs = document.title;
+
+    // Traduce una frase en español al idioma elegido (o devuelve null si no la conoce)
+    function traducir(es) {
+      const d = T[idioma];
+      if (d[es] !== undefined && typeof d[es] === "string") return d[es];
+      let m = es.match(new RegExp("^(" + DIAS_ES.join("|") + ") (\\d{1,2}) de (" + MESES_ES.join("|") + ")$"));
+      if (m) return d._fecha(d._dias[DIAS_ES.indexOf(m[1])], m[2], d._meses[MESES_ES.indexOf(m[3])]);
+      m = es.match(/^Falta: (.+)\.$/);
+      if (m) return d._falta + m[1].split(", ").map(x => d._faltan[x] || x).join(", ") + ".";
+      return null;
+    }
+    function traducirNodo(nodo) {
+      if (idioma === "es" || !nodo.parentElement || nodo.parentElement.closest(SALTAR)) return;
+      const actual = nodo.nodeValue, g = guardados.get(nodo);
+      if (g && actual === g.tr) return;                       // ya está traducido
+      const limpio = actual.trim();
+      if (!limpio) return;
+      const tr = traducir(limpio);
+      if (tr === null) return;
+      const nuevo = actual.replace(limpio, tr);
+      guardados.set(nodo, { es: actual, tr: nuevo });
+      nodo.nodeValue = nuevo;
+    }
+    function recorrer(raiz) {
+      if (raiz.nodeType === 3) return traducirNodo(raiz);
+      if (raiz.nodeType !== 1) return;
+      const w = document.createTreeWalker(raiz, NodeFilter.SHOW_TEXT);
+      let n; while ((n = w.nextNode())) traducirNodo(n);
+    }
+
+    // Textos dentro de cuadros (placeholders)
+    function atributos() {
+      document.querySelectorAll("input[placeholder], textarea[placeholder]").forEach(el => {
+        if (el.closest("#panelDueno")) return;
+        if (!el.dataset.phEs) el.dataset.phEs = el.placeholder;
+        el.placeholder = idioma === "es" ? el.dataset.phEs : (traducir(el.dataset.phEs) || el.dataset.phEs);
+      });
+    }
+
+    // Texto grande de "Sobre mí" (se mantiene la animación palabra por palabra)
+    let sobreEs = null;
+    function sobreMi() {
+      const palabras = [...document.querySelectorAll("#declaracion .palabra")];
+      if (!palabras.length) return;
+      if (!sobreEs) sobreEs = palabras.map(p => p.innerHTML);
+      if (idioma === "es") { palabras.forEach((p, i) => p.innerHTML = sobreEs[i]); return; }
+      const texto = T[idioma]._sobre.split(" "), M = palabras.length, N = texto.length;
+      palabras.forEach((p, i) => {
+        p.innerHTML = texto.slice(Math.floor(i * N / M), Math.floor((i + 1) * N / M)).join(" ").replace(/\*(.+?)\*/g, "<em>$1</em>");
+      });
+    }
+
+    function aplicar(nuevo) {
+      // volver todo al español
+      guardados.forEach((g, nodo) => { if (nodo.isConnected && nodo.nodeValue === g.tr) nodo.nodeValue = g.es; });
+      guardados.clear();
+      idioma = nuevo;
+      document.documentElement.lang = nuevo;
+      document.title = nuevo === "es" ? tituloEs : T[nuevo]._titulo;
+      if (nuevo !== "es") recorrer(document.body);
+      atributos(); sobreMi();
+      document.querySelectorAll(".idiomas button").forEach(b => b.classList.toggle("activo", b.dataset.idioma === nuevo));
+      try { localStorage.setItem("jb-idioma", nuevo); } catch (e) {}
+    }
+
+    // Lo que la página escribe después (días, horas, ticket, avisos) también se traduce
+    new MutationObserver(cambios => {
+      if (idioma === "es") return;
+      cambios.forEach(c => {
+        if (c.type === "characterData") traducirNodo(c.target);
+        else c.addedNodes.forEach(recorrer);
+      });
+    }).observe(document.body, { subtree: true, childList: true, characterData: true });
+
+    // Botones ES · EN · GA en la barra de arriba
+    const barra = document.querySelector(".barra");
+    if (barra) {
+      const der = document.createElement("div");
+      der.className = "barra-der";
+      der.innerHTML = `<div class="idiomas" role="group" aria-label="Idioma / Language">
+        <button data-idioma="es" title="Español">ES</button><button data-idioma="en" title="English">EN</button><button data-idioma="ga" title="Gaeilge">GA</button></div>`;
+      const cta = barra.querySelector(".barra-cta"), menu = barra.querySelector(".barra-menu");
+      barra.insertBefore(der, cta || menu);
+      if (cta) der.appendChild(cta);
+      if (menu) der.appendChild(menu);
+      der.querySelectorAll(".idiomas button").forEach(b => b.addEventListener("click", () => {
+        if (b.dataset.idioma === idioma) return;
+        const anim = document.body.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 180, fill: "forwards" });
+        anim.onfinish = () => { aplicar(b.dataset.idioma); document.body.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 320 }); anim.cancel(); };
+      }));
+    }
+
+    // Idioma inicial: el del link (?lang=en / ?lang=ga), el último elegido, o español
+    const delLink = new URLSearchParams(location.search).get("lang");
+    let guardado = null; try { guardado = localStorage.getItem("jb-idioma"); } catch (e) {}
+    const valido = x => x === "es" || (x && T[x]);
+    aplicar([delLink, guardado].find(valido) || "es");
+  })();
+  </script>
 </body>
 </html>
