@@ -61,8 +61,7 @@
     .cursor span { font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--papel); opacity: 0; transition: opacity .3s; }
     .cursor.grande { width: 88px; height: 88px; background: var(--violeta); mix-blend-mode: normal; }
     .cursor.grande span { opacity: 1; }
-    @media (hover: none), (pointer: coarse) { .cursor { display: none; } }
-
+    .cursor { display: none !important; }
     /* ---------- BARRA FLOTANTE ---------- */
     .barra { position: fixed; top: 16px; left: 50%; z-index: 100; translate: -50% 0; width: min(1240px, 100% - 32px); display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 10px 10px 10px 22px; border-radius: 100px; background: rgba(246, 245, 241, .72); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--linea); transition: transform .7s var(--curva); }
     .barra.escondida { transform: translateY(-140%); }
