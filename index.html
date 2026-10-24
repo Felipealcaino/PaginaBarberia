@@ -354,6 +354,13 @@
       .enlace-grande { font-size: 1.7rem; }
       .chip { white-space: normal; text-align: left; }
     }
+        /* ---------- ARREGLO: títulos de los cursos que no se corten ---------- */
+    .curso h3 { font-size: clamp(2.4rem, 4.6vw, 4.6rem); overflow-wrap: anywhere; }
+    @media (max-width: 760px) {
+      .curso { padding: 28px 22px; }
+      .curso h3 { font-size: min(2.4rem, 8.4vw); margin: 10px 0 14px; }
+      .curso-precio { font-size: 1.6rem; }
+    }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation: none !important; transition: none !important; }
       html.js .sube, html.js .destapa > img, html.js .hero-titulo .letra, html.js .pie-gigante .letra { opacity: 1 !important; transform: none !important; clip-path: none !important; }
