@@ -361,6 +361,8 @@
       .curso h3 { font-size: min(2.4rem, 8.4vw); margin: 10px 0 14px; }
       .curso-precio { font-size: 1.6rem; }
     }
+    .como-llegar { display: inline-block; margin-top: 8px; font-weight: 700; color: var(--violeta); border-bottom: 1px solid currentColor; }
+    .como-llegar:hover { color: var(--tinta); }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation: none !important; transition: none !important; }
       html.js .sube, html.js .destapa > img, html.js .hero-titulo .letra, html.js .pie-gigante .letra { opacity: 1 !important; transform: none !important; clip-path: none !important; }
@@ -589,13 +591,10 @@
           <a class="enlace-grande sube" href="#agenda" data-nombre="Agenda">Agendar hora <span>↗</span></a>
           <div class="info-contacto sube">
             <!-- CAMBIA: dirección exacta -->
-            <div><small>Dónde</small><p>Curicó, Región del Maule</p></div>
-            <div><small>Horario</small><ul class="horario" id="listaHorario"></ul></div>
-          </div>
+            <div><small>Dónde</small><p>Colbún 1379, Curicó</p><a class="como-llegar" href="https://www.google.com/maps/dir/?api=1&destination=Colb%C3%BAn+1379%2C+Curic%C3%B3%2C+Chile" target="_blank">Cómo llegar ↗</a></div>          </div>
         </div>
         <!-- CAMBIA: pon la dirección exacta después de q= (los espacios van con +) -->
-        <div class="mapa-caja sube"><iframe loading="lazy" src="https://www.google.com/maps?q=Curic%C3%B3,+Chile&output=embed" title="Mapa"></iframe></div>
-      </div>
+        <div class="mapa-caja sube"><iframe loading="lazy" src="https://www.google.com/maps?q=Colb%C3%BAn+1379,+Curic%C3%B3,+Chile&z=17&output=embed" title="Mapa"></iframe></div>      </div>
     </div>
     <div class="pie-gigante envoltura" id="pieGigante">
       <h2 class="dividir" aria-label="Joako">JOAKO</h2>
@@ -1348,6 +1347,7 @@
         "Pasa por": "Come sit in", "Dónde": "Where", "Curicó, Región del Maule": "Curicó, Maule Region", "Horario": "Opening hours",
         "Lunes": "Monday", "Martes": "Tuesday", "Miércoles": "Wednesday", "Jueves": "Thursday", "Viernes": "Friday", "Sábado": "Saturday", "Domingo": "Sunday", "Cerrado": "Closed",
         "Volver arriba ↑": "Back to top ↑",
+        "Cómo llegar ↗": "Get directions ↗",
         "Tu nombre": "Your name", "Tu teléfono": "Your phone", "Comentario (opcional): ej. mid fade con diseño": "Comment (optional): e.g. mid fade with a design",
         "_titulo": "Joako Barber | Barber & colourist in Curicó",
         "_sobre": "I'm Joaquín, a barber and *colourist* in Curicó. I work every fade down to the detail, draw razor designs and I'm not afraid of colour: highlights, full colour and platinum you can spot from a mile away.",
@@ -1407,6 +1407,7 @@
         "Pasa por": "Suigh sa", "Dónde": "Cá háit", "Curicó, Región del Maule": "Curicó, Réigiún Maule", "Horario": "Uaireanta oscailte",
         "Lunes": "Dé Luain", "Martes": "Dé Máirt", "Miércoles": "Dé Céadaoin", "Jueves": "Déardaoin", "Viernes": "Dé hAoine", "Sábado": "Dé Sathairn", "Domingo": "Dé Domhnaigh", "Cerrado": "Dúnta",
         "Volver arriba ↑": "Ar ais go barr ↑",
+        "Cómo llegar ↗": "Treoracha ↗",
         "Tu nombre": "D'ainm", "Tu teléfono": "D'uimhir fóin", "Comentario (opcional): ej. mid fade con diseño": "Nóta (roghnach): m.sh. mid fade le dearadh",
         "_titulo": "Joako Barber | Bearbóir agus dathadóir i gCuricó",
         "_sobre": "Is mise Joaquín, bearbóir agus *dathadóir* i gCuricó. Oibrím gach fade go mion, tarraingím dearaí le rásúr agus níl eagla orm roimh dhath: buaicphointí, dath iomlán agus platanam a fheicfeá i bhfad uait.",
