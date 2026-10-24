@@ -1007,5 +1007,239 @@
     actualizarTicket();
   })();
   </script>
+    <!-- ==================== PANEL DEL DUEÑO + BLOQUEO DE CLIENTES (Firebase) ==================== -->
+  <style>
+    .panel-dueno { position: fixed; inset: 0; z-index: 700; background: rgba(18, 18, 18, .65); backdrop-filter: blur(6px); display: none; place-items: center; padding: 16px; }
+    .panel-dueno.abierto { display: grid; }
+    .panel-caja { width: min(580px, 100%); max-height: 92vh; overflow-y: auto; background: var(--papel); border-radius: 22px; padding: 30px; box-shadow: 0 40px 80px -20px rgba(0, 0, 0, .5); }
+    .panel-cabeza { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 6px; }
+    .panel-caja h3 { font-size: 1.8rem; }
+    .panel-caja > p, .panel-nota { color: var(--gris); font-size: .9rem; margin-bottom: 18px; }
+    .panel-campos { display: grid; gap: 10px; }
+    .panel-campos input { width: 100%; padding: 14px 18px; border-radius: 14px; border: 1px solid var(--linea); background: var(--hueso); font: inherit; outline: none; }
+    .panel-campos input:focus { border-color: var(--violeta); }
+    .pd-btn { padding: 13px 18px; border-radius: 100px; font-weight: 700; background: var(--tinta); color: var(--papel); transition: background .3s, opacity .3s; }
+    .pd-btn:hover { background: var(--violeta); }
+    .pd-btn:disabled { opacity: .5; pointer-events: none; }
+    .pd-btn.borde { background: transparent; color: var(--tinta); border: 1px solid var(--linea); }
+    .pd-btn.borde:hover { border-color: var(--tinta); }
+    .pd-btn.chico { padding: 8px 14px; font-size: .82rem; }
+    .pd-mensaje { min-height: 1.3em; margin: 10px 0 0; font-size: .85rem; font-weight: 600; color: var(--violeta); }
+    .pd-mensaje.ok { color: #1f8a4c; }
+    .pd-lista-cabeza { display: flex; justify-content: space-between; align-items: baseline; margin: 26px 0 10px; padding-top: 18px; border-top: 1px solid var(--linea); }
+    .pd-lista-cabeza b { font-family: 'Syne', sans-serif; font-size: 1.15rem; }
+    .pd-lista-cabeza span { font-size: .82rem; color: var(--gris); }
+    .pd-buscar { margin-bottom: 10px; }
+    .pd-item { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--linea); }
+    .pd-item b { display: block; font-size: 1rem; }
+    .pd-item small { display: block; color: var(--gris); font-size: .8rem; }
+    .pd-vacio { color: var(--gris); font-size: .9rem; padding: 14px 0; }
+    .ticket-bloqueado { color: var(--violeta) !important; font-weight: 700; }
+  </style>
+
+  <div class="panel-dueno" id="panelDueno" data-lenis-prevent>
+    <div class="panel-caja">
+      <!-- Pantalla de ingreso -->
+      <div id="pdIngreso">
+        <div class="panel-cabeza"><h3>Panel del dueño</h3><button class="pd-btn borde chico" data-cerrar>Cerrar</button></div>
+        <p>Ingresa con tu correo y contraseña para administrar los clientes bloqueados.</p>
+        <div class="panel-campos">
+          <input id="pdCorreo" type="email" placeholder="Correo" autocomplete="username">
+          <input id="pdClave" type="password" placeholder="Contraseña" autocomplete="current-password">
+          <button class="pd-btn" id="pdEntrar">Entrar</button>
+        </div>
+        <p class="pd-mensaje" id="pdMsgIngreso"></p>
+      </div>
+
+      <!-- Pantalla de administración -->
+      <div id="pdAdmin" hidden>
+        <div class="panel-cabeza"><h3>Bloqueados</h3>
+          <div style="display:flex;gap:8px"><button class="pd-btn borde chico" id="pdSalir">Salir</button><button class="pd-btn borde chico" data-cerrar>Cerrar</button></div>
+        </div>
+        <p class="panel-nota">Los clientes bloqueados no pueden enviar reservas desde la página.</p>
+        <div class="panel-campos">
+          <input id="pdFono" type="tel" placeholder="Teléfono del cliente (ej: 9 1234 5678)">
+          <input id="pdNombre" type="text" placeholder="Nombre (opcional)">
+          <input id="pdMotivo" type="text" placeholder="Motivo (opcional): ej. faltó 2 veces sin avisar">
+          <button class="pd-btn" id="pdBloquear">Bloquear número</button>
+        </div>
+        <p class="pd-mensaje" id="pdMsgAdmin"></p>
+        <div class="pd-lista-cabeza"><b>Lista de bloqueados</b><span id="pdTotal"></span></div>
+        <div class="panel-campos pd-buscar"><input id="pdFiltro" type="search" placeholder="Buscar por número o nombre"></div>
+        <div id="pdLista"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    /* =====================================================================
+       CAMBIA: pega aquí los datos de tu proyecto de Firebase
+       (Firebase → Configuración del proyecto → Tus apps → firebaseConfig)
+       ===================================================================== */
+    const FIREBASE = {
+      apiKey: "",
+      authDomain: "",
+      projectId: "",
+      appId: ""
+    };
+    /* ===================================================================== */
+
+    const URL_FB = "https://www.gstatic.com/firebasejs/10.12.2/";
+    const $ = s => document.querySelector(s);
+    const MENSAJE = "No es posible agendar online con este número. Escríbele directamente a Joaquín.";
+    const listaLocal = (typeof CONFIG !== "undefined" && CONFIG.bloqueados) || [];
+    const guardar = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+    const leer = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+    const limpiar = t => (t || "").replace(/\D/g, "").slice(-9);
+    const bonito = t => { const d = limpiar(t); return d.length === 9 ? `+56 ${d[0]} ${d.slice(1, 5)} ${d.slice(5)}` : t; };
+    const escapar = t => String(t || "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+    // El teléfono se guarda como un código, así nadie puede leer los números desde la página
+    async function codigoDe(t) {
+      const h = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("joako-" + limpiar(t)));
+      return [...new Uint8Array(h)].slice(0, 8).map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+
+    // ---------- Conexión con Firebase ----------
+    let fb = null;
+    const configurado = FIREBASE.apiKey && FIREBASE.projectId;
+    async function conectar() {
+      if (fb || !configurado) return fb;
+      const [app, auth, store] = await Promise.all([
+        import(URL_FB + "firebase-app.js"), import(URL_FB + "firebase-auth.js"), import(URL_FB + "firebase-firestore.js")
+      ]);
+      const aplicacion = app.initializeApp(FIREBASE);
+      fb = { ...auth, ...store, auth: auth.getAuth(aplicacion), db: store.getFirestore(aplicacion) };
+      return fb;
+    }
+    async function estaBloqueado(codigo) {
+      if (listaLocal.includes(codigo)) return true;
+      try {
+        const f = await conectar();
+        if (!f) return false;
+        return (await f.getDoc(f.doc(f.db, "bloqueados", codigo))).exists();
+      } catch (e) { return false; }
+    }
+
+    // ---------- Bloqueo en la agenda ----------
+    const fono = $("#fFono"), boton = $("#tEnviar"), aviso = $("#tAviso");
+    let bloqueado = false;
+    const aplicar = () => {
+      if (!bloqueado || !boton) return;
+      if (!boton.classList.contains("desactivado")) boton.classList.add("desactivado");
+      if (boton.hasAttribute("href")) boton.removeAttribute("href");
+      if (aviso && aviso.textContent !== MENSAJE) { aviso.textContent = MENSAJE; aviso.classList.add("ticket-bloqueado"); }
+    };
+    if (fono && boton) {
+      // ¿Este celular ya intentó antes con un número bloqueado?
+      const marca = leer("jb-marca");
+      if (marca) estaBloqueado(marca).then(si => { bloqueado = si; aplicar(); });
+      let espera;
+      fono.addEventListener("input", () => {
+        clearTimeout(espera);
+        espera = setTimeout(async () => {
+          if (limpiar(fono.value).length < 8 || !window.crypto || !crypto.subtle) return;
+          const c = await codigoDe(fono.value);
+          if (await estaBloqueado(c)) { bloqueado = true; guardar("jb-marca", c); }
+          aplicar();
+        }, 350);
+      });
+      boton.addEventListener("click", e => { if (bloqueado) { e.preventDefault(); e.stopImmediatePropagation(); aplicar(); } }, true);
+      new MutationObserver(aplicar).observe(boton, { attributes: true });
+      if (aviso) new MutationObserver(aplicar).observe(aviso, { childList: true, characterData: true, subtree: true });
+    }
+
+    // ---------- Panel del dueño (se abre con #dueno al final del link) ----------
+    const panel = $("#panelDueno");
+    let usuario = null, registros = [];
+    const mostrarPantalla = () => { $("#pdIngreso").hidden = !!usuario; $("#pdAdmin").hidden = !usuario; if (usuario) cargarLista(); };
+    const revisar = async () => {
+      const abrir = location.hash === "#dueno";
+      panel.classList.toggle("abierto", abrir);
+      if (!abrir) return;
+      if (!configurado) { $("#pdMsgIngreso").textContent = "Falta pegar los datos de Firebase en el código (FIREBASE)."; return; }
+      try {
+        const f = await conectar();
+        f.onAuthStateChanged(f.auth, u => { usuario = u; mostrarPantalla(); });
+      } catch (e) { $("#pdMsgIngreso").textContent = "No se pudo conectar. Revisa tu internet."; }
+    };
+    const cerrarPanel = () => { history.replaceState(null, "", location.pathname); panel.classList.remove("abierto"); };
+    document.querySelectorAll("[data-cerrar]").forEach(b => b.addEventListener("click", cerrarPanel));
+    addEventListener("hashchange", revisar);
+    revisar();
+
+    // Entrar
+    $("#pdEntrar").addEventListener("click", async () => {
+      const msg = $("#pdMsgIngreso"); msg.className = "pd-mensaje"; msg.textContent = "Entrando...";
+      try {
+        const f = await conectar();
+        await f.signInWithEmailAndPassword(f.auth, $("#pdCorreo").value.trim(), $("#pdClave").value);
+        msg.textContent = ""; $("#pdClave").value = "";
+      } catch (e) { msg.textContent = "Correo o contraseña incorrectos."; }
+    });
+    $("#pdClave").addEventListener("keydown", e => { if (e.key === "Enter") $("#pdEntrar").click(); });
+    $("#pdSalir").addEventListener("click", async () => { const f = await conectar(); await f.signOut(f.auth); });
+
+    // Lista
+    function pintarLista() {
+      const filtro = $("#pdFiltro").value.toLowerCase().replace(/\s/g, "");
+      const vista = registros.filter(r => !filtro || (r.telefono + (r.nombre || "")).toLowerCase().replace(/\s/g, "").includes(filtro));
+      $("#pdTotal").textContent = registros.length + (registros.length === 1 ? " número" : " números");
+      $("#pdLista").innerHTML = vista.length ? vista.map(r => `
+        <div class="pd-item">
+          <div><b>${escapar(bonito(r.telefono))}${r.nombre ? " · " + escapar(r.nombre) : ""}</b>
+          <small>${r.motivo ? escapar(r.motivo) + " · " : ""}${r.fecha ? "desde el " + r.fecha.toLocaleDateString("es-CL") : ""}</small></div>
+          <button class="pd-btn borde chico" data-desbloquear="${r.id}">Desbloquear</button>
+        </div>`).join("") : `<p class="pd-vacio">${registros.length ? "No hay coincidencias." : "No hay clientes bloqueados."}</p>`;
+    }
+    async function cargarLista() {
+      $("#pdLista").innerHTML = `<p class="pd-vacio">Cargando...</p>`;
+      try {
+        const f = await conectar();
+        const res = await f.getDocs(f.collection(f.db, "bloqueadosDatos"));
+        registros = res.docs.map(d => { const x = d.data(); return { id: d.id, ...x, fecha: x.fecha && x.fecha.toDate ? x.fecha.toDate() : (x.fecha || null) }; })
+          .sort((a, b) => (b.fecha || 0) - (a.fecha || 0));
+        pintarLista();
+      } catch (e) { $("#pdLista").innerHTML = `<p class="pd-vacio">No se pudo cargar la lista. Revisa las reglas de Firebase.</p>`; }
+    }
+    $("#pdFiltro").addEventListener("input", pintarLista);
+
+    // Bloquear
+    $("#pdBloquear").addEventListener("click", async () => {
+      const msg = $("#pdMsgAdmin"), btn = $("#pdBloquear"); msg.className = "pd-mensaje";
+      const tel = limpiar($("#pdFono").value);
+      if (tel.length < 8) { msg.textContent = "Escribe un teléfono válido."; return; }
+      btn.disabled = true;
+      try {
+        const f = await conectar(), c = await codigoDe(tel);
+        if (registros.some(r => r.id === c)) { msg.textContent = "Ese número ya está bloqueado."; btn.disabled = false; return; }
+        const lote = f.writeBatch(f.db);
+        lote.set(f.doc(f.db, "bloqueados", c), { fecha: f.serverTimestamp() });
+        lote.set(f.doc(f.db, "bloqueadosDatos", c), { telefono: tel, nombre: $("#pdNombre").value.trim(), motivo: $("#pdMotivo").value.trim(), fecha: f.serverTimestamp() });
+        await lote.commit();
+        ["#pdFono", "#pdNombre", "#pdMotivo"].forEach(s => $(s).value = "");
+        msg.className = "pd-mensaje ok"; msg.textContent = bonito(tel) + " quedó bloqueado.";
+        await cargarLista();
+      } catch (e) { msg.textContent = "No se pudo bloquear. Revisa las reglas de Firebase."; }
+      btn.disabled = false;
+    });
+
+    // Desbloquear
+    $("#pdLista").addEventListener("click", async e => {
+      const b = e.target.closest("[data-desbloquear]");
+      if (!b) return;
+      const r = registros.find(x => x.id === b.dataset.desbloquear);
+      if (!confirm("¿Desbloquear " + bonito(r ? r.telefono : "") + "?")) return;
+      b.disabled = true;
+      try {
+        const f = await conectar(), lote = f.writeBatch(f.db);
+        lote.delete(f.doc(f.db, "bloqueados", b.dataset.desbloquear));
+        lote.delete(f.doc(f.db, "bloqueadosDatos", b.dataset.desbloquear));
+        await lote.commit();
+        const msg = $("#pdMsgAdmin"); msg.className = "pd-mensaje ok"; msg.textContent = bonito(r ? r.telefono : "") + " quedó desbloqueado.";
+        await cargarLista();
+      } catch (err) { b.disabled = false; $("#pdMsgAdmin").textContent = "No se pudo desbloquear."; }
+    });
+  </script>
 </body>
 </html>
